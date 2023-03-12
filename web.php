@@ -1,24 +1,18 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Models\Post;
+use App\Models\Category;
+use App\Models\User;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
+
 
 Route::get('/', function () {
     return view ('home',[
         "title"=>"home"
     ]);
 });
-
 
 Route::get('/about', function () {
     return view ('about', [
@@ -31,89 +25,31 @@ Route::get('/about', function () {
 });
 
 
-Route::get('/blog', function () {
-    $blog_posts = [
-        [
-            "title" => "merindu cahaya de amstel",
-            "slug" => "merindu-cahaya-de-amstel",
-            "author" => "sandika galih",
-            "body" => " Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
-            Cupiditate doloribus aliquam repudiandae, quis numquam commodi sint provident. 
-            Fugit dignissimos dicta fuga, impedit velit a necessitatibus eos! Fugit accusamus 
-            tenetur commodi. Odio, obcaecati vitae temporibus ipsa, itaque repellat maiores 
-            ratione autem beatae dolorem quos sequi mollitia illum,
-            eius ea vero exercitationem perferendis sed ad eum cum et soluta.
-            Quia omnis ea sit excepturi consequatur quas nihil velit impedit nesciunt
-            obcaecati numquam illum,  provident totam blanditiis, expedita soluta, optio magnam voluptatum dolor."
-        ],
-    
-        [
-            "title" => "kutunggukau di blora",
-            "slug" => "kutunggukau-di-blora",
-            "author" => "sandika galih2",
-            "body" => " Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
-            Cupiditate doloribus aliquam repudiandae, quis numquam commodi sint provident. 
-            Fugit dignissimos dicta fuga, impedit velit a necessitatibus eos! Fugit accusamus 
-            tenetur commodi. Odio, obcaecati vitae temporibus ipsa, itaque repellat maiores 
-            ratione autem beatae dolorem quos sequi mollitia illum,
-            eius ea vero exercitationem perferendis sed ad eum cum et soluta.
-            Quia omnis ea sit excepturi consequatur quas nihil velit impedit nesciunt
-            obcaecati numquam illum,  provident totam blanditiis, expedita soluta, optio magnam voluptatum dolor."
-        ]
-    
-        ];
+Route::get('/blog', [PostController::class, 'index']);
+//halaman single route
+Route::get('posts/{post:slug}', [PostController::class, 'show']);
 
-       return view ('blog', [
-        "title"=>"blog",
-        "posts" => $blog_posts
-       ]
-    );
+Route::get('/categories', function(){
+    return view('categories',[
+        'title' => 'Post Categories',
+        'categories' => Category::all()
+
+    ]);
 });
 
-//halam single route
-Route::get('posts/{slug}', function($slug) {
-    $blog_posts = [
-        [
-            "title" => "merindu cahaya de amstel",
-            "slug" => "merindu-cahaya-de-amstel",
-            "author" => "sandika galih",
-            "body" => " Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
-            Cupiditate doloribus aliquam repudiandae, quis numquam commodi sint provident. 
-            Fugit dignissimos dicta fuga, impedit velit a necessitatibus eos! Fugit accusamus 
-            tenetur commodi. Odio, obcaecati vitae temporibus ipsa, itaque repellat maiores 
-            ratione autem beatae dolorem quos sequi mollitia illum,
-            eius ea vero exercitationem perferendis sed ad eum cum et soluta.
-            Quia omnis ea sit excepturi consequatur quas nihil velit impedit nesciunt
-            obcaecati numquam illum,  provident totam blanditiis, expedita soluta, optio magnam voluptatum dolor."
-        ],
-    
-        [
-            "title" => "kutunggukau di blora",
-            "slug" => "kutunggukau-di-blora",
-            "author" => "sandika galih2",
-            "body" => " Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
-            Cupiditate doloribus aliquam repudiandae, quis numquam commodi sint provident. 
-            Fugit dignissimos dicta fuga, impedit velit a necessitatibus eos! Fugit accusamus 
-            tenetur commodi. Odio, obcaecati vitae temporibus ipsa, itaque repellat maiores 
-            ratione autem beatae dolorem quos sequi mollitia illum,
-            eius ea vero exercitationem perferendis sed ad eum cum et soluta.
-            Quia omnis ea sit excepturi consequatur quas nihil velit impedit nesciunt
-            obcaecati numquam illum,  provident totam blanditiis, expedita soluta, optio magnam voluptatum dolor."
-        ]
-    
-        ];
+Route::get('/categories/{category:slug}', function(Category $category){
+    return view('blog', [
+    'title' => "Post By Category : $category->name",
+    'posts' => $category->posts->load('category','author'),
 
-        $new_post=[];
-        foreach ($blog_posts as $post) {
-            # code...
-            if ($post["slug"] === $slug) {
-                $new_post = $post;
-            }
-
-        }
-
-    return view('post', [
-        "title" => "Single Post",
-        "post" => $new_post
     ]);
+
+});
+
+Route::get('/authors/{author:username}', function(User $author){
+    return view('blog', [
+    'title' => "Post by Author : $author->name",
+    'posts' => $author->posts->load('category','author') 
+  ]);
+
 });
